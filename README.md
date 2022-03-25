@@ -5,6 +5,10 @@
 
 # HEALPix Alchemy
 
+This version of healpix-alchemy has been modified to work with asyncpg. This *will not work*
+with `psycopg2`, and requires both `asyncpg` and the new `AsyncSession` in [SQLAlchemy] v1.4! 
+The only difference of substance is the use of tuples of the `asyncpg.Range()` type instead of lists of strings for representing the PostgreSQL `MULTIRANGE` type. 
+
 The `healpix_alchemy` Python package is an extension for the [SQLAlchemy]
 object relational mapper. It adds region and image arithmetic to [PostgreSQL]
 (version 14 and newer) databases. It accelerates queries between point clouds,

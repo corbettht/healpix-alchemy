@@ -9,6 +9,8 @@ import numpy as np
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import INT8RANGE
 
+import asyncpg 
+
 from .constants import HPX, LEVEL, PIXEL_AREA_LITERAL
 
 __all__ = ('Point', 'Tile')
@@ -40,7 +42,7 @@ class Tile(sa.TypeDecorator):
             shift = 2 * (LEVEL - level)
             value = (ipix << shift, (ipix + 1) << shift)
         if isinstance(value, Sequence) and len(value) == 2:
-            value = f'[{value[0]},{value[1]})'
+            value = asyncpg.Range(lower=value[0], upper=value[1], lower_inc=True, upper_inc=False)
         return value
 
     class comparator_factory(INT8RANGE.comparator_factory):
@@ -78,7 +80,9 @@ class Tile(sa.TypeDecorator):
 
     @classmethod
     def tiles_from_moc(cls, moc):
-        return (f'[{lo},{hi})' for lo, hi in moc._interval_set.nested)
+        return (
+            asyncpg.Range(lower=lo, upper=hi, lower_inc=True, upper_inc=False)
+            for lo, hi in moc._interval_set.nested)
 
 
 @sa.event.listens_for(sa.Index, 'after_parent_attach')
